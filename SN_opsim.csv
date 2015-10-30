@@ -1,4 +1,4 @@
-obsHistID,expMJD,filter,finSeeing,bandmag
+#obsHistID,expMJD,filter,finSeeing,bandmag
 165827,49561.251252,r,0.96264,nan
 165828,49561.251681,r,0.962342,nan
 165829,49561.252109,r,0.951342,nan

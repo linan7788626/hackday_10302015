@@ -391,7 +391,7 @@ xr1_idx = xr1_idx.astype("int")
 xr2_idx = (xr2+boxsize/2.0-dsx/2.0)/dsx
 xr2_idx = xr2_idx.astype("int")
 
-g_lsn[xr1_idx,xr2_idx] = 0.05
+g_lsn[xr1_idx,xr2_idx] = 0.01
 
 ys11 = 0.0
 ys12 = 0.0
@@ -409,18 +409,33 @@ print np.max(td_sn),np.max(mu_sn)
 
 #print np.max(image1),np.max(image2)
 
-npics = 50
-ic = 30
+ic = 50
 
 levels = [0.0,0.8,1.6,2.4,3.2,4.0]
+time_days,mags = np.loadtxt("./SN_opsim.csv",dtype='string', delimiter=',', usecols=(1, 3), unpack=True)
+time_days = np.double(time_days).astype("double")
+mags = mags.astype("double")
+
+#print len(time_days)
+#time_days_sub = time_days[20::5]
+#mags_sub = mags[20::5]
+#nsub = len(time_days)/npics
+#print len(time_days_sub)
+
+mags_gals = 17.0+9.0
+mags_sns = mags
+rat = 10.0**(mags_sns-mags_gals)
+npics = len(mags_sns)
 
 for i in xrange(npics):
     sktd = td_sn/td_sn.max()*ic
-    itmp = i
-    ratio = parabola_1d(itmp,sktd,ic,2.0/ic**2.0)
+    sktd = sktd.astype("int")
+    idx = time_days+sktd
+    ratio_map = rat[idx]
 
-    final_image = image1+image2+g_lsn*np.abs(mu_sn)*(1.0+ratio)/2
+    final_image = image1+image2+g_lsn*np.abs(mu_sn)*ratio_map
 
+    #pl.imshow(final_image,cmap = pl.get_cmap(gray))
     pl.contourf(final_image,levels)
     pl.savefig("./output_pngs/"+'{:0>10}'.format(str(npics-i))+".png")
     filename = "./output_fits/"+'{:0>10}'.format(str(npics-i))+"_output_double.fits"
