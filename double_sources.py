@@ -413,7 +413,7 @@ ic = 50
 
 levels = [0.0,0.8,1.6,2.4,3.2,4.0]
 time_days,mags = np.loadtxt("./SN_opsim.csv",dtype='string', delimiter=',', usecols=(1, 3), unpack=True)
-time_days = np.double(time_days).astype("double")
+time_days = np.double(time_days).astype("int")
 mags = mags.astype("double")
 
 #print len(time_days)
@@ -429,8 +429,8 @@ npics = len(mags_sns)
 
 for i in xrange(npics):
     sktd = td_sn/td_sn.max()*ic
-    sktd = sktd.astype("int")
-    idx = time_days+sktd
+    idx = time_days[i]+sktd
+    print sktd
     ratio_map = rat[idx]
 
     final_image = image1+image2+g_lsn*np.abs(mu_sn)*ratio_map
