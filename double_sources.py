@@ -167,7 +167,6 @@ def phi_nie(sigmav,x1,x2,qe,xcore,z1,z2):
     x = np.sqrt(xcore*xcore+x1*x1*(1.0-qe)+x2*x2*(1.0+qe))
     #res2 = Dds/Ds*4.0*np.pi*sigmav**2.0/vc**2.0*mm.apr
     ac = sigmav**2.0*mm.apr/(mm.G*mm.Da(z1)*scr)
-    print sigmav
     res = ac*x
     return res
 
@@ -229,13 +228,23 @@ def td_nie(xi1,xi2,q0,rc0,z1,z2):
     ai1,ai2 = alpha_nie(sigmav[0],xx1,xx2,q0,rc0,z1,z2)
     phi =  phi_nie(sigmav[0],xx1,xx2,q0,rc0,z1,z2)
     #Kc = 1.0
-    Kc = (1.0+zl)/mm.vc*(mm.Da(z1)*mm.Da(z2)/mm.Da2(z1,z2))
+    Kc = (1.0+zl)/mm.vc*(mm.Da(z1)*mm.Da(z2)/mm.Da2(z1,z2))*mm.Mpc/(1e3*mm.dy)/mm.apr/mm.apr
     td = Kc*(0.5*((ai1)**2.0+(ai2)**2.0)-phi)
+
+    print Kc
+    print np.max(td),
+    print np.min(td)
+    print np.max(td)-np.min(td)
 
     phi12,phi11 = np.gradient(ai1,dsx_in)
     phi22,phi21 = np.gradient(ai2,dsx_in)
 
     mu = 1.0/(1.0-phi11-phi22+phi11*phi22-phi12*phi21)
+
+    pl.contourf(td)
+    pl.colorbar()
+    pl.show()
+
 
     return td,mu
 #--------------------------------------------------------------------
@@ -405,11 +414,11 @@ image2 = output_lensed_images(input2,yi21,yi22,ys21,ys22,dsi)
 
 td_sn,mu_sn = td_nie(xx1,xx2,0.05,0.0,zl,zs1)
 
-print np.max(td_sn),np.max(mu_sn)
+#print np.max(td_sn),np.max(mu_sn)
 
 #print np.max(image1),np.max(image2)
 
-ic = 50
+ic = 20.0
 
 levels = [0.0,0.8,1.6,2.4,3.2,4.0]
 time_days,mags = np.loadtxt("./SN_opsim.csv",dtype='string', delimiter=',', usecols=(1, 3), unpack=True)
@@ -424,42 +433,48 @@ mags = mags.astype("double")
 
 mags_gals = 17.0+9.0
 mags_sns = mags
-rat = 10.0**(mags_sns-mags_gals)
+rat = 10.0**mags_sns
 npics = len(mags_sns)
 
-for i in xrange(npics):
-    sktd = td_sn/td_sn.max()*ic
-    idx = time_days[i]+sktd
-    print sktd
+#print mags_sns
+#print rat
+
+#for i in xrange(npics):
+for i in xrange(1):
+    sktd = td_sn/td_sn.max()*20.0
+    idx = time_days[i]+sktd-time_days[0]
+    idx = idx.astype("int")
     ratio_map = rat[idx]
 
     final_image = image1+image2+g_lsn*np.abs(mu_sn)*ratio_map
+    #print np.max(g_lsn*np.abs(mu_sn)*ratio_map)
+    #print np.max(final_image)
 
     #pl.imshow(final_image,cmap = pl.get_cmap(gray))
     pl.contourf(final_image,levels)
     pl.savefig("./output_pngs/"+'{:0>10}'.format(str(npics-i))+".png")
-    filename = "./output_fits/"+'{:0>10}'.format(str(npics-i))+"_output_double.fits"
-    pyfits.writeto(filename,image1+image2+g_lsn*np.abs(mu_sn),clobber=True)
+    #filename = "./output_fits/"+'{:0>10}'.format(str(npics-i))+"_output_double.fits"
+    #pyfits.writeto(filename,image1+image2+g_lsn*np.abs(mu_sn),clobber=True)
 
-#filename = "output_double.fits"
-#pyfits.writeto(filename,image1+image2+g_lsn*np.abs(mu_sn),clobber=True)
-##--------------------------lens images contour------------------------
-##levels = [0.15,0.30,0.45,0.60,0.75,0.9,1.05]
-#figure(num=None,figsize=(10,5),dpi=80, facecolor='w', edgecolor='k')
-
-
-#a = axes([0.05,0.1,0.4,0.8])
-#a.set_xlim(-boxsize/4.0,boxsize/4.0)
-#a.set_ylim(-boxsize/4.0,boxsize/4.0)
-#a.contourf(xx1,xx2,g_source_pin)
-##a.contour(yi1,yi2,mua,0,colors=('g'),linewidths = 2.0)
+##filename = "output_double.fits"
+##pyfits.writeto(filename,image1+image2+g_lsn*np.abs(mu_sn),clobber=True)
+###--------------------------lens images contour------------------------
+###levels = [0.15,0.30,0.45,0.60,0.75,0.9,1.05]
+##figure(num=None,figsize=(10,5),dpi=80, facecolor='w', edgecolor='k')
 
 
-#b = axes([0.55,0.1,0.4,0.8])
-#b.set_xlim(-boxsize/4.0,boxsize/4.0)
-#b.set_ylim(-boxsize/4.0,boxsize/4.0)
-#b.contourf(xx1,xx2,g_lensimage)
-##b.contour(xi1,xi2,muap,colors=('k'),linewidths = 2.0)
-##savefig('output.pdf')
-#show()
-#------------------------------------------------------------------------------
+##a = axes([0.05,0.1,0.4,0.8])
+##a.set_xlim(-boxsize/4.0,boxsize/4.0)
+##a.set_ylim(-boxsize/4.0,boxsize/4.0)
+##a.contourf(xx1,xx2,g_source_pin)
+###a.contour(yi1,yi2,mua,0,colors=('g'),linewidths = 2.0)
+
+
+##b = axes([0.55,0.1,0.4,0.8])
+##b.set_xlim(-boxsize/4.0,boxsize/4.0)
+##b.set_ylim(-boxsize/4.0,boxsize/4.0)
+##b.contourf(xx1,xx2,g_lensimage)
+###b.contour(xi1,xi2,muap,colors=('k'),linewidths = 2.0)
+###savefig('output.pdf')
+##show()
+##------------------------------------------------------------------------------
