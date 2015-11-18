@@ -1,58 +1,116 @@
 #!/usr/bin/env python
-import pygame
-from pygame.locals import *
-from sys import exit
 import numpy as np
+import pylab as pl
 
-from scipy.ndimage.filters import gaussian_filter
+#from scipy.ndimage.filters import gaussian_filter
 from scipy.ndimage.filters import maximum_filter
 from scipy.ndimage.morphology import generate_binary_structure, binary_erosion
 import scipy.optimize as sco
 
+#class triangle_vector(ind):
+    #def __init__(self, ind):
+
+        #<`0`>
+
 def build_triangles(xgrids1,xgrids2):
-    vertex11 = xgrids1[:-1,:-1]
-    vertex12 = xgrids2[:-1,:-1]
-    vertex21 = xgrids1[1:,1:]
-    vertex22 = xgrids2[1:,1:]
-    vertex31 = xgrids1[1:,:-1]
-    vertex32 = xgrids2[1:,:-1]
-    vertex41 = xgrids1[:-1,1:]
-    vertex42 = xgrids2[:-1,1:]
 
-    vax1 = np.hstack(np.array([vertex11.flatten(),vertex21.flatten(),vertex31.flatten()]))
-    vax2 = np.hstack(np.array([vertex12.flatten(),vertex22.flatten(),vertex32.flatten()]))
-    vbx1 = np.hstack(np.array([vertex11.flatten(),vertex21.flatten(),vertex41.flatten()]))
-    vbx2 = np.hstack(np.array([vertex12.flatten(),vertex22.flatten(),vertex42.flatten()]))
+    indices_matrix = np.indices(np.shape(xgrids1))
 
-    return vax1,vax2,vbx1,vbx2
+    idx_vertex1 = indices_matrix[:,:-1,:-1]
+    idx_vertex2 = indices_matrix[:,1:,:-1]
+    idx_vertex3 = indices_matrix[:,1:,1:]
+    idx_vertex4 = indices_matrix[:,:-1,1:]
 
-def mapping_triangles(ys1,ys2,vx1,vx2,alpha1,alpha2):
-    lvx1 = vx1-np.hstack(np.array([alpha1[:-1,:-1].flatten(),alpha1[:-1,:-1].flatten(),alpha1[:-1,:-1].flatten()]))
-    lvx2 = vx2-np.hstack(np.array([alpha2[:-1,:-1].flatten(),alpha2[:-1,:-1].flatten(),alpha2[:-1,:-1].flatten()]))
-    ntri = len(lvx1)/3
+    tri1 = [idx_vertex1,idx_vertex2,idx_vertex3]
+    tri2 = [idx_vertex1,idx_vertex3,idx_vertex4]
 
-    d00 = lvx1[:ntri]
-    tmplvx1 = ys1-lvx1
-    tmplvx2 = ys2-lvx2
+    return np.array(tri1),np.array(tri2)
 
-    d11 = tmplvx1[:ntri]
-    d12 = tmplvx2[:ntri]
-    d21 = tmplvx1[ntri:2*ntri]
-    d22 = tmplvx2[ntri:2*ntri]
-    d31 = tmplvx1[2*ntri:]
-    d32 = tmplvx2[2*ntri:]
+def sign_tri(p1,p2,p3):
+    return (p1[0] - p3[0]) * (p2[1] - p3[1]) - (p2[0] - p3[0]) * (p1[1] - p3[1])
 
-    dd12 = d11*d22-d12*d21
-    dd23 = d21*d32-d22*d31
-    dd13 = d11*d32-d12*d31
+def PointInTriangle(pt,v1,v2,v3):
+    b1 = sign_tri(pt, v1, v2) <= 0.0
+    b2 = sign_tri(pt, v2, v3) <= 0.0
+    b3 = sign_tri(pt, v3, v1) <= 0.0
 
-    idx1 = dd12 >0
-    idx2 = dd23 >0
-    idx3 = dd13 >0
+    return ((b1 == b2) & (b2 == b3))
 
-    idx = idx1&idx2&idx3
+def triangle_vectors(ind,jnd,tri1,xgrids1,xgrids2):
+    v1 = np.array([xgrids1[tri1[0,0,ind,jnd],tri1[0,1,ind,jnd]],xgrids2[tri1[0,0,ind,jnd],tri1[0,1,ind,jnd]]])
+    v2 = np.array([xgrids1[tri1[1,0,ind,jnd],tri1[1,1,ind,jnd]],xgrids2[tri1[1,0,ind,jnd],tri1[1,1,ind,jnd]]])
+    v3 = np.array([xgrids1[tri1[2,0,ind,jnd],tri1[2,1,ind,jnd]],xgrids2[tri1[2,0,ind,jnd],tri1[2,1,ind,jnd]]])
 
-    return len(d00[idx])
+    return v1,v2,v3
+
+def tria_vectors(i,j,xgrids1,xgrids2):
+
+    i
+    ip1 = i+1
+    jp1 = j+1
+
+    v1 = np.array([xgrids1[i,j],xgrids2[i,j]])
+    v2 = np.array([xgrids1[ip1,j],xgrids2[ip1,j]])
+    v3 = np.array([xgrids1[ip1,jp1],xgrids2[ip1,jp1]])
+
+
+    return v1,v2,v3
+
+def trib_vectors(i,j,xgrids1,xgrids2):
+
+    i
+    ip1 = i+1
+    jp1 = j+1
+
+    v1 = np.array([xgrids1[i,j],xgrids2[i,j]])
+    v2 = np.array([xgrids1[ip1,jp1],xgrids2[ip1,jp1]])
+    v3 = np.array([xgrids1[i,jp1],xgrids2[i,jp1]])
+
+    return v1,v2,v3
+
+def new_grids(x0,y0,bsz,ngrids):
+
+    dsx = bsz/ngrids
+    xi1 = np.linspace(-bsz/2.0,bsz/2.0-dsx,ngrids)+0.2*dsx+x0
+    xi2 = np.linspace(-bsz/2.0,bsz/2.0-dsx,ngrids)+0.2*dsx+y0
+    xi1,xi2 = np.meshgrid(xi1,xi2)
+
+    return xi1,xi2
+
+
+def mapping_triangles(ys1,ys2,xgrids1,xgrids2,lgrids1,lgrids2):
+
+    tri1,tri2 = build_triangles(xgrids1,xgrids2)
+
+    ntris = np.shape(xgrids1)[0]-1
+
+    dsx = xgrids1[1,1]-xgrids1[0,0]
+    xroot1 = []
+    xroot2 = []
+
+    ncount = 0
+    for i in xrange(ntris):
+        for j in xrange(ntris):
+            xv1,xv2,xv3 = tria_vectors(i,j,xgrids1,xgrids2)
+            lv1,lv2,lv3 = tria_vectors(i,j,lgrids1,lgrids2)
+            if PointInTriangle([ys1,ys2],lv1,lv2,lv3):
+                xroot1.append(xv1[0]+dsx/2.0)
+                xroot2.append(xv1[1]+dsx/2.0)
+                ncount = ncount + 1
+
+    for i in xrange(ntris):
+        for j in xrange(ntris):
+            xv1,xv2,xv3 = trib_vectors(i,j,xgrids1,xgrids2)
+            lv1,lv2,lv3 = trib_vectors(i,j,lgrids1,lgrids2)
+            if PointInTriangle([ys1,ys2],lv1,lv2,lv3):
+                #xroot1.append((xv1[0]+xv2[0]+xv3[0])/3.0)
+                #xroot2.append((xv1[1]+xv2[1]+xv3[1])/3.0)
+                xroot1.append(xv1[0]+dsx/2.0)
+                xroot2.append(xv1[1]+dsx/2.0)
+                ncount = ncount + 1
+
+
+    return xroot1,xroot2,ncount
 
 def isNewImage(x1,x2,xil1,xil2):
     rdist = np.hypot((x1-xil1),(x2-xil2))
@@ -66,13 +124,6 @@ def detect_local_maxima(image):
     eroded_background = binary_erosion(background, structure=neighborhood, border_value=1)
     detected_peaks = local_max - eroded_background
     return detected_peaks
-
-#def re0_sigma(sigma):
-#    cv = 3e5
-#    Dds = 1.0
-#    Ds = 2.0
-#    res = 4.0*np.pi*(sigma/cv)**2.0*Dds/Ds
-#    return res
 
 def hfunc(x1,x2,rcore,qe):
     res = np.sqrt(qe*qe*(rcore*rcore+x1*x1)+x2*x2)
@@ -90,7 +141,9 @@ def nie_phi(x1,x2,re0,rcore,qe):
     res = res1-res2
     return res
 
-def nie_alphas(x1,x2,re0,rcore,qe):
+def nie_alphas(xx1,xx2,xc1,xc2,re0,rcore,qe):
+    x1 = xx1-xc1
+    x2 = xx2-xc2
     res0 = re0/np.sqrt(1-qe*qe)
     al1 = np.arctan(x1*np.sqrt(1-qe*qe)/(hfunc(x1,x2,rcore,qe)+rcore))
     al2 = np.arctanh(x2*np.sqrt(1-qe*qe)/(hfunc(x1,x2,rcore,qe)+rcore*qe*qe))
@@ -216,270 +269,52 @@ def root_finding(x_guess,xlc1,xlc2,re0,rc0,ql0,phi0,y10,y20):
     # 'anderson','hybr','lm','broyden1','broyden2','anderson','linearmixing','diagbroyden','excitingmixing','krylov','df-sane'
     return sol.x
 
+def refine_roots(xb1,xb2,xl1,xl2,bsz,nnn,ys1,ys2):
+
+    ql0 = 0.699999999999
+    rc0 = 0.000000000001
+    re0 = 1.0
+
+    xi1,xi2 = new_grids(xb1,xb2,bsz,nnn)
+    alpha1,alpha2 = nie_alphas(xi1,xi2,xl1,xl2,re0,rc0,ql0)
+    yi1 = xi1-alpha1
+    yi2 = xi2-alpha2
+
+    xroot1,xroot2,nroots = mapping_triangles(ys1,ys2,xi1,xi2,yi1,yi2)
+
+    return xroot1,xroot2,nroots
 def main():
+    nnn = 32
+    bsz = 4.0
+    dsx = bsz/nnn
 
-    nnn = 512
-    boxsize = 4.0
-    dsx = boxsize/nnn
-    xi1 = np.linspace(-boxsize/2.0,boxsize/2.0-dsx,nnn)+0.5*dsx
-    xi2 = np.linspace(-boxsize/2.0,boxsize/2.0-dsx,nnn)+0.5*dsx
-    xi1,xi2 = np.meshgrid(xi1,xi2)
+    xb1 = 0.0
+    xb2 = 0.0
 
-    ql0 = 0.699999999999
-    rc0 = 0.000000000001
-    re0 = 1.0
-    alpha1,alpha2 = nie_alphas(xi1,xi2,1.0,0.0,0.7)
-    vax1,vax2,vbx1,vbx2 = build_triangles(xi1,xi2)
+    ys1 = np.random.random(1)*(0.2-0.1)+0.05
+    ys2 = np.random.random(1)*(0.2-0.1)+0.05
 
-    d00 = mapping_triangles(0.0,0.1,vax1,vax2,alpha1,alpha2)
-    print d00
-
-    pygame.init()
-    FPS = 60
-    fpsClock = pygame.time.Clock()
-
-    screen = pygame.display.set_mode((nnn, nnn), 0, 32)
-
-    pygame.display.set_caption("Twinkles")
-
-    mouse_cursor = pygame.Surface((nnn,nnn))
-
-    #----------------------------------------------------
-
-    base0 = np.zeros((nnn,nnn,3),'uint8')
-    base1 = np.zeros((nnn,nnn,3),'uint8')
-    base2 = np.zeros((nnn,nnn,3),'uint8')
-
-    #----------------------------------------------------
-    # lens parameters for main halo
-    xlc1 = 0.0
-    xlc2 = 0.0
-    ql0 = 0.699999999999
-    rc0 = 0.000000000001
-    re0 = 1.0
-    phi0 = 0.0
-    lpar = np.asarray([xlc1, xlc2, re0, rc0, ql0, phi0])
-
-    lpars_list = []
-    lpars_list.append(lpar)
-
-    y10 = 0.33984375*nnn/2
-    y20 = -0.11328125*nnn/2
-
-    #----------------------------------------------------
-    # lens parameters for main halo
-    xls1 = 0.7
-    xls2 = 0.8
-    qls = 0.999999999999
-    rcs = 0.000000000001
-    res = 0.0
-    phis = 0.0
-    lpars = np.asarray([xls1, xls2, res, rcs, qls, phis])
-    lpars_list.append(lpars)
-
-    ap0 = 1.0
-    l_sig0 = 0.5
-    glpar  = np.asarray([ap0,l_sig0,xlc1,xlc2,ql0,phi0])
-
-    g_lens = lens_galaxies(xi1,xi2,glpar)
-
-    base0[:,:,0] = g_lens*256
-    base0[:,:,1] = g_lens*128
-    base0[:,:,2] = g_lens*0
-
-    #x = 0.33984375*nnn/2
-    #y = -0.11328125*nnn/2
-
-    x = 0.013984375*nnn/2
-    y = -0.021328125*nnn/2
-    step = 1
-    gr_sig = 0.1
-
-    LeftButton=0
-
-    ##----------------------------------------------------
-    #ic = FPS/6.0
-
-    #i = 0
-    #while True:
-        #i = i+1
-        #for event in pygame.event.get():
-            #if event.type == QUIT:
-                #exit()
-            #if event.type == MOUSEMOTION:
-
-                #if event.buttons[LeftButton]:
-                    #rel = event.rel
-                    #x += rel[0]
-                    #y += rel[1]
-
-            ##----------------------------------------------
-            #if event.type == pygame.MOUSEBUTTONDOWN:
-                #if event.button == 4:
-                    #gr_sig -= 0.1
-                    #if gr_sig <0.01:
-                        #gr_sig = 0.01
-
-                #elif event.button == 5:
-                    #gr_sig += 0.01
-                    #if gr_sig >0.4:
-                        #gr_sig = 0.4
-
-
-
-        #keys = pygame.key.get_pressed()  #checking pressed keys
-        #if keys[pygame.K_RIGHT]:
-            #x += step
-            #if x > 500:
-                #x = 500
-        #if keys[pygame.K_LSHIFT] & keys[pygame.K_RIGHT]:
-            #x += 30*step
-
-        #if keys[pygame.K_LEFT]:
-            #x -= step
-            #if x < -500:
-                #x = -500
-
-        #if keys[pygame.K_LSHIFT] & keys[pygame.K_LEFT]:
-            #x -= 30*step
-
-        #if keys[pygame.K_UP]:
-            #y -= step
-            #if y < -500 :
-                #y = -500
-        #if keys[pygame.K_LSHIFT] & keys[pygame.K_UP]:
-            #y -= 30*step
-
-        #if keys[pygame.K_DOWN]:
-            #y += step
-            #if y > 500 :
-                #y = 500
-        #if keys[pygame.K_LSHIFT] & keys[pygame.K_DOWN]:
-            #y += 30*step
-
-
-        ##----------------------------------------------
-        #if keys[pygame.K_MINUS]:
-            #gr_sig -= 0.01
-            #if gr_sig <0.01:
-                #gr_sig = 0.01
-
-        #if keys[pygame.K_EQUALS]:
-            #gr_sig += 0.01
-            #if gr_sig >0.1:
-                #gr_sig = 0.1
-
-        ##gr_sig = 0.005
-
-        ##----------------------------------------------
-        ##parameters of source galaxies.
-        ##----------------------------------------------
-        #g_amp = 1.0         # peak brightness value
-        #g_sig = gr_sig          # Gaussian "sigma" (i.e., size)
-        #g_xcen = x*2.0/nnn  # x position of center
-        #g_ycen = y*2.0/nnn  # y position of center
-        #g_axrat = 1.0       # minor-to-major axis ratio
-        #g_pa = 0.0          # major-axis position angle (degrees) c.c.w. from y axis
-        #gpar = np.asarray([g_amp, g_sig, g_ycen, g_xcen, g_axrat, g_pa])
-        ##----------------------------------------------
-
-        ###----------------------------------------------
-        ###parameters of SNs.
-        ###----------------------------------------------
-        ##g_amp = 1.0         # peak brightness value
-        ##g_sig = 0.01          # Gaussian "sigma" (i.e., size)
-        ##g_xcen = x*2.0/nnn+0.05  # x position of center
-        ##g_ycen = y*2.0/nnn+0.05  # y position of center
-        ##g_axrat = 1.0       # minor-to-major axis ratio
-        ##g_pa = 0.0          # major-axis position angle (degrees) c.c.w. from y axis
-        ##gpsn = np.asarray([g_amp, g_sig, g_ycen, g_xcen, g_axrat, g_pa])
-
-        ##phi,td,ai1,ai2,kappa,mu,yi1,yi2,td2 = nie_all(xi1,xi2,xlc1,xlc2,re0,rc0,ql0,phi0,g_ycen,g_xcen)
-        ##g_image,g_lensimage = lensed_images(xi1,xi2,yi1,yi2,gpar)
-
-        ###g_lensimage = detect_local_maxima(g_lensimage)
-        ##g_image = g_image
-        ##g_lensimage = g_lensimage*0.0
-        ###g_sn,g_lsn = lensed_images_point(xi1,xi2,yi1,yi2,gpsn)
-        ##g_sn,g_lsn = lensed_images(xi1,xi2,yi1,yi2,gpsn)
-        ##g_lsn = detect_local_maxima(g_lsn)
-
-        ###g_sn = tophat_2d(xi1,xi2,gpsn)
-        ###g_sn_pin = lv4.call_ray_tracing(g_sn,xi1,xi2,ysc1,ysc2,dsi)
-        ###g_lsn = lv4.call_ray_tracing(g_sn,yi1,yi2,ysc1,ysc2,dsi)
-
-        ##----------------------------------------------
-        ##parameters of SNs.
-        ##----------------------------------------------
-        #g_amp = 1.0         # peak brightness value
-        #g_sig = 0.01          # Gaussian "sigma" (i.e., size)
-        #g_xcen = y*2.0/nnn+0.05  # x position of center
-        #g_ycen = x*2.0/nnn+0.05  # y position of center
-        #g_axrat = 1.0       # minor-to-major axis ratio
-        #g_pa = 0.0          # major-axis position angle (degrees) c.c.w. from y axis
-        #gpsn = np.asarray([g_amp, g_sig, g_ycen, g_xcen, g_axrat, g_pa])
-
-        #phi,td,ai1,ai2,kappa,mu,yi1,yi2,td2,yss1,yss2 = nie_all(xi1,xi2,xlc1,xlc2,re0,rc0,ql0,phi0,g_ycen,g_xcen)
-        #g_image,g_lensimage = lensed_images(xi1,xi2,yi1,yi2,gpar)
-        #g_image = g_image*0.0
-        #g_lensimage = g_lensimage*0.0
-        #g_sn,g_lsn_tmp = lensed_images(xi1,xi2,yi1,yi2,gpsn)
-        #g_lsn_tmp = detect_local_maxima(g_lsn_tmp)
-
-        #xr1 = np.zeros((50))
-        #xr2 = np.zeros((50))
-        #xg1 = xi1[g_lsn_tmp>0]
-        #xg2 = xi2[g_lsn_tmp>0]
-        #ncount = 0
-        #for i in xrange(len(xg1)):
-            #xrt1,xrt2 = root_finding([xg1[i],xg2[i]],xlc1,xlc2,re0,rc0,ql0,phi0,g_ycen,g_xcen)
-            #if isNewImage(xrt1,xrt2,xr1,xr2) <= 0:
-                #xr1[ncount]=xrt1
-                #xr2[ncount]=xrt2
-                #ncount = ncount + 1
-
-        #xr1_idx = (xr1+boxsize/2.0-dsx/2.0)/dsx
-        #xr1_idx = xr1_idx.astype("int")
-        #xr2_idx = (xr2+boxsize/2.0-dsx/2.0)/dsx
-        #xr2_idx = xr2_idx.astype("int")
-
-        #g_lsn = g_lsn_tmp*0.0
-        #g_lsn[xr1_idx,xr2_idx] = 256.0
-
-        #g_lsn = gaussian_filter(g_lsn,5.0)
-
-
-        #sktd = td/td.max()*ic
-        #itmp = (i)%(FPS)
-        #ratio = parabola_1d(itmp,40+sktd,ic,2.0/ic**2.0)
-        #ratio0 = parabola_1d(itmp,0.0*sktd,ic,2.0/ic**2.0)
-
-        #base1[:,:,0] = g_sn*100*(1.0+ratio0)/2+g_image*256
-        #base1[:,:,1] = g_sn*100*(1.0+ratio0)/2+g_image*256
-        #base1[:,:,2] = g_sn*100*(1.0+ratio0)/2+g_image*256
-
-        #base2[:,:,0] = g_lsn*100*(1.0+ratio)/2+g_lensimage*102
-        #base2[:,:,1] = g_lsn*100*(1.0+ratio)/2+g_lensimage*178
-        #base2[:,:,2] = g_lsn*100*(1.0+ratio)/2+g_lensimage*256
-
-
-        #wf = base1+base2
-
-        #idx1 = wf>=base0
-        #idx2 = wf<base0
-
-        #base = base0*0
-        #base[idx1] = wf[idx1]
-        #base[idx2] = base0[idx2]
-
-
-        ##base = wf*base0+(base1+base2)
-        #pygame.surfarray.blit_array(mouse_cursor,base)
-        #screen.blit(mouse_cursor, (0, 0))
-        #pygame.display.update()
-        #fpsClock.tick(FPS)
-
+    xroot1,xroot2,nroots = refine_roots(xb1,xb2,0.0,0.0,bsz,nnn,ys1,ys2)
+    pl.figure(figsize=(10,10))
+    pl.xlim(-2.0,2.0)
+    pl.ylim(-2.0,2.0)
+    pl.plot(ys1,ys2,'ro')
+    pl.plot(xroot1,xroot2,'go')
+    for i in xrange(nroots):
+        xrt1,xrt2,nrts = refine_roots(xroot1[i],xroot2[i],0.0,0.0,dsx*2.0,nnn,ys1,ys2)
+        for j in xrange(nrts):
+            xrt1,xrt2,nrts = refine_roots(xrt1[j],xrt2[j],0.0,0.0,dsx/nnn*2.0,nnn,ys1,ys2)
+            for k in xrange(nrts):
+                xrt1,xrt2,nrts = refine_roots(xrt1[j],xrt2[j],0.0,0.0,dsx*2.1/nnn**2.0,nnn,ys1,ys2)
+        print i, nrts,xrt1,xrt2
+        pl.figure(figsize=(10,10))
+        pl.xlim(-2.0,2.0)
+        pl.ylim(-2.0,2.0)
+        pl.plot(ys1,ys2,'ro')
+        pl.plot(xrt1,xrt2,'go')
+    return 0
 
 if __name__ == '__main__':
     main()
+    #pl.show()
 
