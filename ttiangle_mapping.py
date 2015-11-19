@@ -7,6 +7,21 @@ from scipy.ndimage.filters import maximum_filter
 from scipy.ndimage.morphology import generate_binary_structure, binary_erosion
 import scipy.optimize as sco
 
+def circleCenter(A, B, C):
+    yDelta_a = B[1] - A[1]
+    xDelta_a = B[0] - A[0]
+    yDelta_b = C[1] - B[1]
+    xDelta_b = C[0] - B[0]
+
+    ct = A*0.0
+
+    aSlope = yDelta_a/xDelta_a
+    bSlope = yDelta_b/xDelta_b
+    ct[0] = (aSlope*bSlope*(A[1]-C[1])+bSlope*(A[0] + B[0])-aSlope*(B[0]+C[0]))/(2*(bSlope-aSlope));
+    ct[1] = -1*(ct[0]-(A[0]+B[0])/2)/aSlope+(A[1]+B[1])/2;
+
+    return ct
+
 def yi_xi(xi,xl1,xl2,re0,rc0,ql0):
     als1,als2 = nie_alphas(xi[0],xi[1],xl1,xl2,re0,rc0,ql0)
     yi = xi-np.array([als1,als2])
@@ -17,6 +32,7 @@ def sub_triangles(pi1,pi2,pi3,pit,xl1,xl2,re0,rc0,ql0):
     p2 = np.array(pi2)
     p3 = np.array(pi3)
     pt = np.array(pit)
+    p4 = pt*0.0
 
 
     dp12 = p1-p2
@@ -27,7 +43,6 @@ def sub_triangles(pi1,pi2,pi3,pit,xl1,xl2,re0,rc0,ql0):
     mdp23 = dp23.dot(dp23)
     mdp31 = dp31.dot(dp31)
     deltax = np.sqrt(np.max(np.array([mdp12,mdp23,mdp31])))
-    #print mdp12,mdp23,mdp31,deltax**2
 
     lp1 = yi_xi(p1,xl1,xl2,re0,rc0,ql0)
     lp2 = yi_xi(p2,xl1,xl2,re0,rc0,ql0)
@@ -41,20 +56,8 @@ def sub_triangles(pi1,pi2,pi3,pit,xl1,xl2,re0,rc0,ql0):
     lpts3 = []
     ntris = 0
 
-    if ((mdp31>=mdp12) and (mdp31>=mdp23)):
-        p4 = (p1+p3)/(2.+np.random.random(1)*0.1-0.05)
-        lp4 = yi_xi(p4,xl1,xl2,re0,rc0,ql0)
-
-    if ((mdp12>=mdp23) and (mdp12>=mdp31)):
-        p4 = (p1+p2)/(2.+np.random.random(1)*0.1-0.05)
-        lp4 = yi_xi(p4,xl1,xl2,re0,rc0,ql0)
-
-    if ((mdp23>=mdp12) and (mdp23>=mdp31)):
-        p4 = (p2+p3)/(2.+np.random.random(1)*0.1-0.05)
-        lp4 = yi_xi(p4,xl1,xl2,re0,rc0,ql0)
-
-    #print lp1,lp2,lp3,lp4
-    #print (p1+p3)/2.0,(p2+p3)/2.0,(p1+p2)/2.0
+    p4 = (p1+p2+p3)/3.0
+    lp4 = yi_xi(p4,xl1,xl2,re0,rc0,ql0)
 
 
     print PointInTriangle(pt,lp1,lp2,lp3)
@@ -88,8 +91,8 @@ def sub_triangles(pi1,pi2,pi3,pit,xl1,xl2,re0,rc0,ql0):
         lpts2.append(lp3)
         lpts3.append(lp4)
         ntris = ntris+1
-
-    #print p1,p2,p3,p4
+    print p1,p2,p3,p4
+    print npts1[0],npts2[0],npts3[0]
 
     #npts1.append(p1)
     #npts2.append(p2)
@@ -115,11 +118,11 @@ def sub_triangles(pi1,pi2,pi3,pit,xl1,xl2,re0,rc0,ql0):
     #lpts3.append(lp4)
     #ntris = ntris+1
 
-    #pl.figure(figsize=(10,10))
-    #pl.xlim(-2.0,2.0)
-    #pl.ylim(-2.0,2.0)
-    #pl.plot(np.array([npts1[0][0],npts2[0][0],npts3[0][0],npts1[0][0]]),np.array([npts1[0][1],npts2[0][1],npts3[0][1],npts1[0][1]]),'r-')
-    #pl.plot(np.array([lpts1[0][0],lpts2[0][0],lpts3[0][0],lpts1[0][0]]),np.array([lpts1[0][1],lpts2[0][1],lpts3[0][1],lpts1[0][1]]),'g-')
+    pl.figure(figsize=(10,10))
+    pl.xlim(-2.0,2.0)
+    pl.ylim(-2.0,2.0)
+    pl.plot(np.array([npts1[0][0],npts2[0][0],npts3[0][0],npts1[0][0]]),np.array([npts1[0][1],npts2[0][1],npts3[0][1],npts1[0][1]]),'r-')
+    pl.plot(np.array([lpts1[0][0],lpts2[0][0],lpts3[0][0],lpts1[0][0]]),np.array([lpts1[0][1],lpts2[0][1],lpts3[0][1],lpts1[0][1]]),'g-')
 
     #pl.plot(np.array([npts1[1][0],npts2[1][0],npts3[1][0],npts1[1][0]]),np.array([npts1[1][1],npts2[1][1],npts3[1][1],npts1[1][1]]),'g-')
     #pl.plot(np.array([lpts1[1][0],lpts2[1][0],lpts3[1][0],lpts1[1][0]]),np.array([lpts1[1][1],lpts2[1][1],lpts3[1][1],lpts1[1][1]]),'b-')
@@ -554,15 +557,15 @@ def main():
         #pt1,pt2,pt3,npt,deltax = sub_triangles([pt1[0][0],pt1[0][1]],[pt2[0][0],pt2[0][1]],[pt3[0][0],pt3[0][1]],[ys1,ys2],xl1,xl2,re0,rc0,ql0)
         #pt1,pt2,pt3,npt,deltax = sub_triangles([pt1[0][0],pt1[0][1]],[pt2[0][0],pt2[0][1]],[pt3[0][0],pt3[0][1]],[ys1,ys2],xl1,xl2,re0,rc0,ql0)
         #pt1,pt2,pt3,npt,deltax = sub_triangles([pt1[0][0],pt1[0][1]],[pt2[0][0],pt2[0][1]],[pt3[0][0],pt3[0][1]],[ys1,ys2],xl1,xl2,re0,rc0,ql0)
-        #pt1,pt2,pt3,npt,deltax = sub_triangles([pt1[0][0],pt1[0][1]],[pt2[0][0],pt2[0][1]],[pt3[0][0],pt3[0][1]],[ys1,ys2],xl1,xl2,re0,rc0,ql0)
-        #pt1,pt2,pt3,npt,deltax = sub_triangles([pt1[0][0],pt1[0][1]],[pt2[0][0],pt2[0][1]],[pt3[0][0],pt3[0][1]],[ys1,ys2],xl1,xl2,re0,rc0,ql0)
         #print pt1
-        while deltax > 1e-7:
-        #while deltax > 0.01125:#/np.sqrt(2):
-        #while deltax == 0.0441941738242:#/np.sqrt(2):
+        nloop = 0
+
+        while deltax > 1e-5:
+        ##while deltax > 0.01125:#/np.sqrt(2):
+            nloop = nloop+1
             pt1,pt2,pt3,npt,deltax = sub_triangles([pt1[0][0],pt1[0][1]],[pt2[0][0],pt2[0][1]],[pt3[0][0],pt3[0][1]],[ys1,ys2],xl1,xl2,re0,rc0,ql0)
             print deltax
-        #pt1,pt2,pt3,npt = sub_triangles([pt1[0][0],pt1[0][1]],[pt2[0][0],pt2[0][1]],[pt3[0][0],pt3[0][1]],[ys1,ys2],xl1,xl2,re0,rc0,ql0)
+            print nloop
 
 
 
