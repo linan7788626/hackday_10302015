@@ -1,0 +1,8 @@
+0) video of contours only.
+1) video of ds9 pngs without PhoSim.
+2) correct mags of supernovas and galaxies.
+3) correct time scale of the light curve of supernovas.
+4) correct time delays of lens.
+5) use OpSim scripts from Scott to produce PhoSim files.
+6) Input fits files and PhoSim files into PhoSim.
+7) Produce final video.

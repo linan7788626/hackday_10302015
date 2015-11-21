@@ -241,11 +241,6 @@ def td_nie(xi1,xi2,q0,rc0,z1,z2):
 
     mu = 1.0/(1.0-phi11-phi22+phi11*phi22-phi12*phi21)
 
-    pl.contourf(td)
-    pl.colorbar()
-    pl.show()
-
-
     return td,mu
 #--------------------------------------------------------------------
 zl0 = 0.1
@@ -281,65 +276,6 @@ yi2 = np.zeros((nnn,nnn))
 
 sigmav = np.zeros((npl))
 sigmav[0] = sigmav0
-#sigmav[1] = sigmav0
-#sigmav[-1] = sigmav0
-
-#xi1[0] = xx1
-#xi2[0] = xx2
-#if (npl==1):
-    #ag1[0],ag2[0] = alpha_nie(sigmav[0],xx1,xx2,q0,rc0,zln[0],zs)
-    #ai1[0] = itpn_on_kth_plane(ag1[0],xi1[0],xi2[0])
-    #ai2[0] = itpn_on_kth_plane(ag2[0],xi1[0],xi2[0])
-
-    #af1 = ai1[0]
-    #af2 = ai2[0]
-
-#if (npl==2):
-    #ag1[0],ag2[0] = alpha_nie(sigmav[0],xx1,xx2,q0,rc0,zln[0],zs)
-    #ai1[0] = itpn_on_kth_plane(ag1[0],xi1[0],xi2[0])
-    #ai2[0] = itpn_on_kth_plane(ag2[0],xi1[0],xi2[0])
-
-    #B01 = Bij(zln[0],zln[1])
-    #xi1[1] = xi1[0]-ai1[0]*B01
-    #xi2[1] = xi2[0]-ai2[0]*B01
-    #ag1[1],ag2[1] = alpha_nie(sigmav[1],xx1,xx2,q0,rc0,zln[1],zs)
-    #ai1[1] = itpn_on_kth_plane(ag1[1],xi1[1],xi2[1])
-    #ai2[1] = itpn_on_kth_plane(ag2[1],xi1[1],xi2[1])
-
-    #af1 = ai1[0]+ai1[1]
-    #af2 = ai2[0]+ai2[1]
-
-#if (npl>2):
-    #ag1[0],ag2[0] = alpha_nie(sigmav[0],xx1,xx2,q0,rc0,zln[0],zs)
-    #ai1[0] = itpn_on_kth_plane(ag1[0],xi1[0],xi2[0])
-    #ai2[0] = itpn_on_kth_plane(ag2[0],xi1[0],xi2[0])
-
-    #B01 = Bij(zln[0],zln[1])
-    #xi1[1] = xi1[0]-ai1[0]*B01
-    #xi2[1] = xi2[0]-ai2[0]*B01
-    #ag1[1],ag2[1] = alpha_nie(sigmav[1],xx1,xx2,q0,rc0,zln[1],zs)
-    #ai1[1] = itpn_on_kth_plane(ag1[1],xi1[1],xi2[1])
-    #ai2[1] = itpn_on_kth_plane(ag2[1],xi1[1],xi2[1])
-
-    #af1 = ai1[0]+ai1[1]
-    #af2 = ai2[0]+ai2[1]
-    #for j in xrange(2,npl):
-        #sum_alpha1 = yi1*0.0
-        #sum_alpha2 = yi2*0.0
-        #for i in xrange(j):
-            #Btmp1 = Bij(zln[i],zln[j])
-            #Btmp2 = Bij(zln[i],zln[j-1])
-            #sum_alpha1 += (Btmp1-Btmp2)*ai1[i]
-            #sum_alpha2 += (Btmp1-Btmp2)*ai2[i]
-
-        #xi1[j] = xi1[j-1]-sum_alpha1
-        #xi2[j] = xi2[j-1]-sum_alpha2
-        #ag1[j],ag2[j] = alpha_nie(sigmav[j],xx1,xx2,q0,rc0,zln[j],zs)
-        #ai1[j] = itpn_on_kth_plane(ag1[j],xi1[j],xi2[j])
-        #ai2[j] = itpn_on_kth_plane(ag2[j],xi1[j],xi2[j])
-
-        #af1 += ai1[j]
-        #af2 += ai2[j]
 af11,af12 = alpha_nie(sigmav[0],xx1,xx2,q0,rc0,zl,zs1)
 
 yi11 =  xx1-af11#*(mm.Da2(zl,zs1)/mm.Da(zs1))*(mm.Da(zs0)/mm.Da2(zl,zs0))
@@ -358,13 +294,6 @@ g_ycen = 0.0    # y position of center
 g_axrat = 1.0   # minor-to-major axis ratio
 g_pa = 0.0      # major-axis position angle (degrees) c.c.w. from x axis
 #----------------------------------------------------------------------
-#g_source = 0.0*xx1
-#gpar = np.asarray([g_amp,g_sig,g_xcen,g_ycen,g_axrat,g_pa])
-#g_source = gauss_2d(xx1,xx2,gpar)
-#g_lensimage = 0.0*yi1
-#g_lensimage = gauss_2d(yi1,yi2,gpar)
-
-#g_source = pyfits.getdata("./compound_R_1_0_S_1_1_u.fits")
 
 def output_lensed_images(input_fits,yy1,yy2,ys1,ys2,dsi):
     g_source = pyfits.getdata(input_fits)
@@ -418,10 +347,11 @@ td_sn,mu_sn = td_nie(xx1,xx2,0.05,0.0,zl,zs1)
 
 #print np.max(image1),np.max(image2)
 
-ic = 20.0
+ic = 10.0
 
-levels = [0.0,0.8,1.6,2.4,3.2,4.0]
-time_days,mags = np.loadtxt("./SN_opsim.csv",dtype='string', delimiter=',', usecols=(1, 3), unpack=True)
+#levels = [0.0,0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6]
+levels = [0.0,0.2,1.2,2.4,3.6]
+time_days,mags = np.loadtxt("./SN_opsim.csv",dtype='string', delimiter=',', usecols=(1, 4), unpack=True)
 time_days = np.double(time_days).astype("int")
 mags = mags.astype("double")
 
@@ -431,16 +361,19 @@ mags = mags.astype("double")
 #nsub = len(time_days)/npics
 #print len(time_days_sub)
 
+print time_days
+
 mags_gals = 17.0+9.0
-mags_sns = mags
-rat = 10.0**mags_sns
+nnan = len(mags[np.isnan(mags)])
+mags_sns = mags[nnan:]
+rat = 10.0**(mags_gals-mags_sns)
 npics = len(mags_sns)
+#print mags_sns
 
 #print mags_sns
 #print rat
 
-#for i in xrange(npics):
-for i in xrange(1):
+for i in xrange(npics):
     sktd = td_sn/td_sn.max()*20.0
     idx = time_days[i]+sktd-time_days[0]
     idx = idx.astype("int")
@@ -451,10 +384,13 @@ for i in xrange(1):
     #print np.max(final_image)
 
     #pl.imshow(final_image,cmap = pl.get_cmap(gray))
-    pl.contourf(final_image,levels)
-    pl.savefig("./output_pngs/"+'{:0>10}'.format(str(npics-i))+".png")
-    #filename = "./output_fits/"+'{:0>10}'.format(str(npics-i))+"_output_double.fits"
+    #pl.figure(figsize=(10,10))
+    #pl.contourf(final_image,levels)
+    #pl.savefig("./output_pngs/"+'{:0>10}'.format(str(npics-i))+".png")
+
+    filename = "./output_fits/"+'{:0>10}'.format(str(i))+"_output_double.fits"
     #pyfits.writeto(filename,image1+image2+g_lsn*np.abs(mu_sn),clobber=True)
+    pyfits.writeto(filename,final_image,clobber=True)
 
 ##filename = "output_double.fits"
 ##pyfits.writeto(filename,image1+image2+g_lsn*np.abs(mu_sn),clobber=True)
@@ -476,5 +412,5 @@ for i in xrange(1):
 ##b.contourf(xx1,xx2,g_lensimage)
 ###b.contour(xi1,xi2,muap,colors=('k'),linewidths = 2.0)
 ###savefig('output.pdf')
-##show()
+#pl.show()
 ##------------------------------------------------------------------------------
