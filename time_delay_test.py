@@ -263,187 +263,187 @@ def td_nie_single(svt,xi1,xi2,q0,rc0,z1,z2):
     #print (1.0+z1)/mm.vc*(mm.Da(z1)*mm.Da(z2)/mm.Da2(z1,z2))*(0.5*b*b-b*np.sqrt(xi1**2.0+xi2**2.0))*mm.Mpc/(1e3*mm.dy)/mm.apr/mm.apr
 
     return td
-b =  4.0*np.pi*(225.0/mm.vc)**2.0*mm.apr*mm.Da2(0.5,2.0)/mm.Da(2.0)
 
-ys1 = 0.6
-ys2 = 0.0
-alr1 = b
-alr2 = 0.0
-xrm1 = ys1-alr1
-xrm2 = ys2-alr2
+#b =  4.0*np.pi*(225.0/mm.vc)**2.0*mm.apr*mm.Da2(0.5,2.0)/mm.Da(2.0)
+#ys1 = 0.6
+#ys2 = 0.0
+#alr1 = b
+#alr2 = 0.0
+#xrm1 = ys1-alr1
+#xrm2 = ys2-alr2
 
-xrp1 = ys1+alr1
-xrp2 = ys2+alr2
+#xrp1 = ys1+alr1
+#xrp2 = ys2+alr2
 
-tdm =  td_nie_single(225.0,xrm1,xrm2,0.0000000001,0.0,0.5,2.0)
-tdp =  td_nie_single(225.0,xrp1,xrp2,0.0000000001,0.0,0.5,2.0)
+#tdm =  td_nie_single(225.0,xrm1,xrm2,0.0000000001,0.0,0.5,2.0)
+#tdp =  td_nie_single(225.0,xrp1,xrp2,0.0000000001,0.0,0.5,2.0)
 
-print tdm,tdp,tdp-tdm
-##--------------------------------------------------------------------
-#zl0 = 0.1
-#zl = 0.5
-#zs0 = 10.0
-#zs1 = 1.0
-#zs2 = 5.0
-#zs = 2.0
-#sigmav0 = 320           #km/s
-#q0 = 0.05
-#rc0 = 0.0
+#print tdm,tdp,tdp-tdm
+#--------------------------------------------------------------------
+zl0 = 0.1
+zl = 0.5
+zs0 = 10.0
+zs1 = 1.0
+zs2 = 5.0
+zs = 2.0
+sigmav0 = 320           #km/s
+q0 = 0.05
+rc0 = 0.0
 
-#boxsize = 10.0 # (arcsec)
-#nnn = 128
-#dsx = boxsize/nnn
-#dsi = 1.0*dsx
-#npl = 3
-#zln = np.linspace(0.0,zs,npl+2)[1:-1]
-#zln[0] = zl
+boxsize = 10.0 # (arcsec)
+nnn = 128
+dsx = boxsize/nnn
+dsi = 1.0*dsx
+npl = 3
+zln = np.linspace(0.0,zs,npl+2)[1:-1]
+zln[0] = zl
 
-#xx01 = np.linspace(-boxsize/2.0,boxsize/2.0,nnn)+0.5*dsx
-#xx02 = np.linspace(-boxsize/2.0,boxsize/2.0,nnn)+0.5*dsx
-#xx1,xx2 = np.meshgrid(xx01,xx02)
+xx01 = np.linspace(-boxsize/2.0,boxsize/2.0,nnn)+0.5*dsx
+xx02 = np.linspace(-boxsize/2.0,boxsize/2.0,nnn)+0.5*dsx
+xx1,xx2 = np.meshgrid(xx01,xx02)
 
-#xi1 = np.zeros((npl,nnn,nnn))
-#xi2 = np.zeros((npl,nnn,nnn))
-#ag1 = np.zeros((npl,nnn,nnn))
-#ag2 = np.zeros((npl,nnn,nnn))
-#ai1 = np.zeros((npl,nnn,nnn))
-#ai2 = np.zeros((npl,nnn,nnn))
-#yi1 = np.zeros((nnn,nnn))
-#yi2 = np.zeros((nnn,nnn))
+xi1 = np.zeros((npl,nnn,nnn))
+xi2 = np.zeros((npl,nnn,nnn))
+ag1 = np.zeros((npl,nnn,nnn))
+ag2 = np.zeros((npl,nnn,nnn))
+ai1 = np.zeros((npl,nnn,nnn))
+ai2 = np.zeros((npl,nnn,nnn))
+yi1 = np.zeros((nnn,nnn))
+yi2 = np.zeros((nnn,nnn))
 
-#sigmav = np.zeros((npl))
-#sigmav[0] = sigmav0
-#af11,af12 = alpha_nie(sigmav[0],xx1,xx2,q0,rc0,zl,zs1)
+sigmav = np.zeros((npl))
+sigmav[0] = sigmav0
+af11,af12 = alpha_nie(sigmav[0],xx1,xx2,q0,rc0,zl,zs1)
 
-#yi11 =  xx1-af11#*(mm.Da2(zl,zs1)/mm.Da(zs1))*(mm.Da(zs0)/mm.Da2(zl,zs0))
-#yi12 =  xx2-af12#*(mm.Da2(zl,zs1)/mm.Da(zs1))*(mm.Da(zs0)/mm.Da2(zl,zs0))
+yi11 =  xx1-af11#*(mm.Da2(zl,zs1)/mm.Da(zs1))*(mm.Da(zs0)/mm.Da2(zl,zs0))
+yi12 =  xx2-af12#*(mm.Da2(zl,zs1)/mm.Da(zs1))*(mm.Da(zs0)/mm.Da2(zl,zs0))
 
-#af21,af22 = alpha_nie(sigmav[0],xx1,xx2,q0,rc0,zl,zs2)
+af21,af22 = alpha_nie(sigmav[0],xx1,xx2,q0,rc0,zl,zs2)
 
-#yi21 =  xx1-af21#*(mm.Da2(zl,zs2)/mm.Da(zs2))*(mm.Da(zs0)/mm.Da2(zl,zs0))
-#yi22 =  xx2-af22#*(mm.Da2(zl,zs2)/mm.Da(zs2))*(mm.Da(zs0)/mm.Da2(zl,zs0))
+yi21 =  xx1-af21#*(mm.Da2(zl,zs2)/mm.Da(zs2))*(mm.Da(zs0)/mm.Da2(zl,zs0))
+yi22 =  xx2-af22#*(mm.Da2(zl,zs2)/mm.Da(zs2))*(mm.Da(zs0)/mm.Da2(zl,zs0))
 
-##----------------------------------------------------------------------
-#g_amp = 1.0     # peak brightness value
-#g_sig = 0.01    # Gaussian "sigma" (i.e., size)
-#g_xcen = 0.0    # x position of center (also try (0.0,0.14)
-#g_ycen = 0.0    # y position of center
-#g_axrat = 1.0   # minor-to-major axis ratio
-#g_pa = 0.0      # major-axis position angle (degrees) c.c.w. from x axis
-##----------------------------------------------------------------------
+#----------------------------------------------------------------------
+g_amp = 1.0     # peak brightness value
+g_sig = 0.01    # Gaussian "sigma" (i.e., size)
+g_xcen = 0.0    # x position of center (also try (0.0,0.14)
+g_ycen = 0.0    # y position of center
+g_axrat = 1.0   # minor-to-major axis ratio
+g_pa = 0.0      # major-axis position angle (degrees) c.c.w. from x axis
+#----------------------------------------------------------------------
 
-#def output_lensed_images(input_fits,yy1,yy2,ys1,ys2,dsi):
-    #g_source = pyfits.getdata(input_fits)
-    #g_source = np.array(g_source,dtype="<d")
-    ##g_source_pin = lv4.call_ray_tracing(g_source,xx1,xx2,g_xcen,g_ycen,dsi)
-    #g_lensimage = lv4.call_ray_tracing(g_source,yy1,yy2,ys1,ys2,dsi)
-    #return g_lensimage
-
-
-#ysn1 = 0.01
-#ysn2 = 0.02
-#re_0 = re_sv(sigmav0,zl,zs2)
-
-#xr1 = np.zeros((5))
-#xr2 = np.zeros((5))
-#xg1 = np.array([ysn1-re_0,ysn1,ysn1,ysn1+re_0])
-#xg2 = np.array([ysn2,ysn2-re_0,ysn2+re_0,ysn2])
-#ncount = 0
-
-#g_lsn = np.zeros((nnn,nnn))
-
-#for i in xrange(len(xg1)):
-    #xrt1,xrt2 = root_finding([xg1[i],xg2[i]],ysn1,ysn2)
-    #if isNewImage(xrt1,xrt2,xr1,xr2) <= 0:
-        #xr1[ncount]=xrt1
-        #xr2[ncount]=xrt2
-        #ncount = ncount + 1
+def output_lensed_images(input_fits,yy1,yy2,ys1,ys2,dsi):
+    g_source = pyfits.getdata(input_fits)
+    g_source = np.array(g_source,dtype="<d")
+    #g_source_pin = lv4.call_ray_tracing(g_source,xx1,xx2,g_xcen,g_ycen,dsi)
+    g_lensimage = lv4.call_ray_tracing(g_source,yy1,yy2,ys1,ys2,dsi)
+    return g_lensimage
 
 
-#xr1_idx = (xr1+boxsize/2.0-dsx/2.0)/dsx
+ysn1 = 0.01
+ysn2 = 0.02
+re_0 = re_sv(sigmav0,zl,zs2)
 
-#xr1_idx = xr1_idx.astype("int")
-#xr2_idx = (xr2+boxsize/2.0-dsx/2.0)/dsx
-#xr2_idx = xr2_idx.astype("int")
+xr1 = np.zeros((5))
+xr2 = np.zeros((5))
+xg1 = np.array([ysn1-re_0,ysn1,ysn1,ysn1+re_0])
+xg2 = np.array([ysn2,ysn2-re_0,ysn2+re_0,ysn2])
+ncount = 0
 
-#g_lsn[xr1_idx,xr2_idx] = 1.0
+g_lsn = np.zeros((nnn,nnn))
 
-#ys11 = 0.0
-#ys12 = 0.0
-#ys21 = 0.0
-#ys22 = 0.0
-
-##input1 = sys.argv[1]
-##input2 = sys.argv[2]
-##image1 = output_lensed_images(input1,yi11,yi12,ys11,ys12,dsi)
-##image2 = output_lensed_images(input2,yi21,yi22,ys21,ys22,dsi)
-
-#td_sn,mu_sn = td_nie(xx1,xx2,0.05,0.0,zl,zs1)
-
-##print np.max(td_sn),np.max(mu_sn)
-##print np.max(image1),np.max(image2)
-
-#ic = 10.0
-
-##levels = [0.0,0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6]
-#levels = [0.0,0.2,1.2,2.4,3.6]
-#time_days,mags = np.loadtxt("./SN_opsim.csv",dtype='string', delimiter=',', usecols=(1, 4), unpack=True)
-#time_days = np.double(time_days).astype("int")
-#mags = mags.astype("double")
-
-##print len(time_days)
-##time_days_sub = time_days[20::5]
-##mags_sub = mags[20::5]
-##nsub = len(time_days)/npics
-##print len(time_days_sub)
+for i in xrange(len(xg1)):
+    xrt1,xrt2 = root_finding([xg1[i],xg2[i]],ysn1,ysn2)
+    if isNewImage(xrt1,xrt2,xr1,xr2) <= 0:
+        xr1[ncount]=xrt1
+        xr2[ncount]=xrt2
+        ncount = ncount + 1
 
 
-#mags_gals = 17.0+9.0
-#nnan = len(mags[np.isnan(mags)])
-#mags_sns = mags[nnan:]
-#rat = 10.0**(mags_gals-mags_sns)
-#npics = len(mags_sns)
+xr1_idx = (xr1+boxsize/2.0-dsx/2.0)/dsx
 
-#time_days_sub = time_days[nnan:]
+xr1_idx = xr1_idx.astype("int")
+xr2_idx = (xr2+boxsize/2.0-dsx/2.0)/dsx
+xr2_idx = xr2_idx.astype("int")
 
-#pl.figure()
-#pl.ylim(30,23)
-#pl.plot(time_days_sub-time_days_sub[0],mags_sns,'k-o')
+g_lsn[xr1_idx,xr2_idx] = 1.0
 
-#lsn_mags = np.zeros((5,npics))
-#lsn_days = np.zeros((5,npics))
+ys11 = 0.0
+ys12 = 0.0
+ys21 = 0.0
+ys22 = 0.0
 
-#for i in xrange(npics):
+#input1 = sys.argv[1]
+#input2 = sys.argv[2]
+#image1 = output_lensed_images(input1,yi11,yi12,ys11,ys12,dsi)
+#image2 = output_lensed_images(input2,yi21,yi22,ys21,ys22,dsi)
 
-    #final_image = g_lsn#*np.abs(mu_sn)
+td_sn,mu_sn = td_nie(xx1,xx2,0.05,0.0,zl,zs1)
 
-    #idx = final_image >0.0
-    #print np.abs(mu_sn[final_image >0.0])
-    #lsn_mags[:,i] = final_image[idx]*mags_sns[i]-np.log10(np.abs(mu_sn[idx]))
-    #lsn_mags[:,i] = final_image[idx]*mags_sns[i]-np.log10(np.abs(mu_sn[idx]))
+#print np.max(td_sn),np.max(mu_sn)
+#print np.max(image1),np.max(image2)
 
-    #sktd = td_sn-td_sn.min()
-    #idxd = time_days_sub[i]+sktd[idx]-time_days_sub[0]
-    #lsn_days[:,i] = idxd
-    ##final_image = image1+image2+g_lsn*np.abs(mu_sn)*ratio_map
-    ##print np.max(g_lsn*np.abs(mu_sn)*ratio_map)
-    ##print np.max(final_image)
+ic = 10.0
 
-    ##pl.imshow(final_image,cmap = pl.get_cmap(gray))
-    ##pl.figure(figsize=(10,10))
-    ##pl.contourf(g_lsn)
-    ##pl.savefig("./output_pngs/"+'{:0>10}'.format(str(npics-i))+".png")
+#levels = [0.0,0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6]
+levels = [0.0,0.2,1.2,2.4,3.6]
+time_days,mags = np.loadtxt("./SN_opsim.csv",dtype='string', delimiter=',', usecols=(1, 4), unpack=True)
+time_days = np.double(time_days).astype("int")
+mags = mags.astype("double")
 
-    ##pyfits.writeto(filename,image1+image2+g_lsn*np.abs(mu_sn),clobber=True)
-    ##pyfits.writeto(filename,final_image,clobber=True)
+#print len(time_days)
+#time_days_sub = time_days[20::5]
+#mags_sub = mags[20::5]
+#nsub = len(time_days)/npics
+#print len(time_days_sub)
 
-#print len(time_days_sub),np.shape(lsn_mags)
 
-#pl.plot(lsn_days[0,:],lsn_mags[0,:],'r-o')
-#pl.plot(lsn_days[1,:],lsn_mags[1,:],'g-o')
-#pl.plot(lsn_days[2,:],lsn_mags[2,:],'b-o')
-#pl.plot(lsn_days[3,:],lsn_mags[3,:],'y-o')
-#pl.plot(lsn_days[4,:],lsn_mags[4,:],'c-o')
+mags_gals = 17.0+9.0
+nnan = len(mags[np.isnan(mags)])
+mags_sns = mags[nnan:]
+rat = 10.0**(mags_gals-mags_sns)
+npics = len(mags_sns)
 
-#pl.show()
-###------------------------------------------------------------------------------
+time_days_sub = time_days[nnan:]
+
+pl.figure()
+pl.ylim(30,23)
+pl.plot(time_days_sub-time_days_sub[0],mags_sns,'k-o')
+
+lsn_mags = np.zeros((5,npics))
+lsn_days = np.zeros((5,npics))
+
+for i in xrange(npics):
+
+    final_image = g_lsn#*np.abs(mu_sn)
+
+    idx = final_image >0.0
+    print np.abs(mu_sn[final_image >0.0])
+    lsn_mags[:,i] = final_image[idx]*mags_sns[i]-np.log10(np.abs(mu_sn[idx]))
+    lsn_mags[:,i] = final_image[idx]*mags_sns[i]-np.log10(np.abs(mu_sn[idx]))
+
+    sktd = td_sn-td_sn.min()
+    idxd = time_days_sub[i]+sktd[idx]-time_days_sub[0]
+    lsn_days[:,i] = idxd
+    #final_image = image1+image2+g_lsn*np.abs(mu_sn)*ratio_map
+    #print np.max(g_lsn*np.abs(mu_sn)*ratio_map)
+    #print np.max(final_image)
+
+    #pl.imshow(final_image,cmap = pl.get_cmap(gray))
+    #pl.figure(figsize=(10,10))
+    #pl.contourf(g_lsn)
+    #pl.savefig("./output_pngs/"+'{:0>10}'.format(str(npics-i))+".png")
+
+    #pyfits.writeto(filename,image1+image2+g_lsn*np.abs(mu_sn),clobber=True)
+    #pyfits.writeto(filename,final_image,clobber=True)
+
+print len(time_days_sub),np.shape(lsn_mags)
+
+pl.plot(lsn_days[0,:],lsn_mags[0,:],'r-o')
+pl.plot(lsn_days[1,:],lsn_mags[1,:],'g-o')
+pl.plot(lsn_days[2,:],lsn_mags[2,:],'b-o')
+pl.plot(lsn_days[3,:],lsn_mags[3,:],'y-o')
+pl.plot(lsn_days[4,:],lsn_mags[4,:],'c-o')
+
+pl.show()
+##------------------------------------------------------------------------------
