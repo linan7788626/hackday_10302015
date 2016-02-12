@@ -524,7 +524,7 @@ def refine_roots(xb1,xb2,xl1,xl2,bsz,nnn,ys1,ys2):
     xroot1,xroot2,nroots = mapping_triangles(ys1,ys2,xi1,xi2,yi1,yi2)
 
     return xroot1,xroot2,nroots,dsx
-def main():
+def calculate_lc_of_imgs():
 
     zl = 0.5
     zs = 2.0
@@ -585,6 +585,12 @@ def main():
     mags4 = mags-2.5*np.log10(np.abs(mu[3]))
     mags5 = mags-2.5*np.log10(np.abs(mu[4]))
 
+    #mui = lens.MAG[0]
+    #nim = lens.NIMG[0]
+    #ms = lens.MAGI_IN[0]
+    #mi = ms - 2.5*np.log10(np.abs(mui[:nim]))
+    #print "om10.plot_lens: source magnitudes, magnification, image magnitudes:",ms,mui[:nim],mi
+
     #print time_days
     #print mags
 
@@ -606,8 +612,8 @@ def main():
     #pl.plot(xr1,xr2,'go')
     #pl.plot(ys1,ys2,'ko')
 
-    return 0
+    return [xr1,xr2],[days1,days2,days3,days4,days5], [mags1,mags2,mags3,mags4,mags5]
 
 if __name__ == '__main__':
-    main()
+    calculate_lc_of_imgs()
     pl.show()
