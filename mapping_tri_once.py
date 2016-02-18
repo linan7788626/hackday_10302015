@@ -524,6 +524,7 @@ def refine_roots(xb1,xb2,xl1,xl2,bsz,nnn,ys1,ys2):
     xroot1,xroot2,nroots = mapping_triangles(ys1,ys2,xi1,xi2,yi1,yi2)
 
     return xroot1,xroot2,nroots,dsx
+
 def calculate_lc_of_imgs():
 
     zl = 0.5
@@ -535,7 +536,7 @@ def calculate_lc_of_imgs():
 
     print re0
 
-    nnn = 32
+    nnn = 512
     bsz = 4.0
     dsx = bsz/nnn
 
@@ -600,20 +601,31 @@ def calculate_lc_of_imgs():
 
     pl.figure()
     pl.ylim(32,22)
-    pl.plot(days1,mags1)
-    pl.plot(days2,mags2)
-    pl.plot(days3,mags3)
-    pl.plot(days4,mags4)
-    pl.plot(days5,mags5)
+    pl.plot(days1-49500,mags1,'r-')
+    pl.plot(days2-49500,mags2,'g-')
+    pl.plot(days3-49500,mags3,'y-')
+    pl.plot(days4-49500,mags4,'b-')
+    pl.plot(days5-49500,mags5,'m-')
 
-    #pl.figure(figsize=(10,10))
-    #pl.xlim(-2.0,2.0)
-    #pl.ylim(-2.0,2.0)
-    #pl.plot(xr1,xr2,'go')
-    #pl.plot(ys1,ys2,'ko')
+    mua = nie_mu(xi1,xi2,re0,rc0,ql0)
+
+    pl.figure(figsize=(5,5))
+    pl.xlim(-2.0,2.0)
+    pl.ylim(-2.0,2.0)
+    pl.plot(xr1[0],xr2[0],'ro')
+    pl.plot(xr1[1],xr2[1],'go')
+    pl.plot(xr1[2],xr2[2],'yo')
+    pl.plot(xr1[3],xr2[3],'bo')
+    pl.plot(xr1[4],xr2[4],'mo')
+    pl.contour(xi1,xi2,mua,colors=('r',))
+    pl.contour(yi1,yi2,mua,colors=('g',))
+    pl.plot(ys1,ys2,'ko')
 
     return [xr1,xr2],[days1,days2,days3,days4,days5], [mags1,mags2,mags3,mags4,mags5]
 
 if __name__ == '__main__':
-    calculate_lc_of_imgs()
+    xr,days,mags = calculate_lc_of_imgs()
+    print xr
+    #print days
+    #print mags
     pl.show()
