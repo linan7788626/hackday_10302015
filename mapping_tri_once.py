@@ -591,10 +591,8 @@ def calculate_lc_of_imgs():
     #ms = lens.MAGI_IN[0]
     #mi = ms - 2.5*np.log10(np.abs(mui[:nim]))
     #print "om10.plot_lens: source magnitudes, magnification, image magnitudes:",ms,mui[:nim],mi
-
     #print time_days
     #print mags
-
     #from astropy.time import Time
     #t = Time(time_days, format='mjd')
     #print t.isot
